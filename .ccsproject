@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?ccsproject version="1.0"?>
+<projectOptions>
+	<ccsVariant value="50:Theia-based"/>
+	<ccsVersion value="70.4.0"/>
+	<deviceFamily value="TMS470"/>
+	<connection value="common/targetdb/connections/TIXDS110_Connection.xml"/>
+	<executableActions value=""/>
+	<createSlaveProjects value=""/>
+	<ignoreDefaultDeviceSettings value="true"/>
+	<ignoreDefaultCCSSettings value="true"/>
+	<templateProperties value="id=adc_to_i2c_target_LP_MSPM0L1306_nortos_ticlang.projectspec.handheld_one_mspm0,buildProfile=release,isHybrid=true"/>
+	<activeTargetConfiguration value="targetConfigs/MSPM0L1306.ccxml"/>
+	<isTargetConfigurationManual value="false"/>
+	<sourceLookupPath value="${COM_TI_MSPM0_SDK_INSTALL_DIR}/source/ti/driverlib"/>
+	<origin value="/home/jma/ti/mspm0_sdk_2_09_00_01/examples/nortos/LP_MSPM0L1306/msp_subsystems/adc_to_i2c_target/ticlang/adc_to_i2c_target_LP_MSPM0L1306_nortos_ticlang.projectspec"/>
+	<filesToOpen value="README.md,adc_to_i2c_target.syscfg"/>
+</projectOptions>
