@@ -114,12 +114,15 @@ int main(void)
     DL_GPIO_init(GPIO_BUTTONS_J2_SW_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_R_BUT_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_R_BUT1_IOMUX);
+    DL_GPIO_init(GPIO_BUTTONS_BUT_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_BUT1_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_BUT2_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_BUT3_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_BUT4_IOMUX);
+    DL_GPIO_init(GPIO_BUTTONS_BUT5_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_BUT6_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_BUT7_IOMUX);
+    DL_GPIO_init(GPIO_BUTTONS_BUT8_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_BUT9_IOMUX);
     DL_GPIO_init(GPIO_BUTTONS_BUT10_IOMUX);
 
@@ -127,16 +130,18 @@ int main(void)
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_J2_SW_PIN);
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_R_BUT_PIN);    
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_R_BUT1_PIN);
+    DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT_PIN);
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT1_PIN);
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT2_PIN);
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT3_PIN);
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT4_PIN);
+    DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT5_PIN);
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT6_PIN);
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT7_PIN);
+    DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT8_PIN);
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT9_PIN);
     DL_GPIO_disableOutput(GPIO_BUTTONS_PORT, GPIO_BUTTONS_BUT10_PIN);
     
-    NVIC_EnableIRQ(UART_0_INST_INT_IRQN);
     NVIC_EnableIRQ(GPIO_BUTTONS_INT_IRQN);
 
     NVIC_EnableIRQ(I2C_INST_INT_IRQN);
@@ -145,8 +150,6 @@ int main(void)
     NVIC_EnableIRQ(TIMER_0_INST_INT_IRQN);
 
     DL_TimerG_startCounter(TIMER_0_INST);
-
-    DL_UART_Main_transmitData(UART_0_INST, 'Y');
 
     while (1)
     {
@@ -162,8 +165,6 @@ int main(void)
 
 /* Process the command given */
 void processCommand(uint8_t cmd){
-    DL_UART_Main_transmitData(UART_0_INST, '0' + cmd);
-
     switch(cmd){
         case PHYHANDHELD_FW_VER:
             //FWVersion(cmd);
@@ -327,18 +328,6 @@ void I2C_INST_IRQHandler(void)
     }
 }
 
-void UART_0_INST_IRQHandler(void)
-{
-    switch (DL_UART_Main_getPendingInterrupt(UART_0_INST)) {
-        case DL_UART_MAIN_IIDX_EOT_DONE:
-            break;
-        case DL_UART_MAIN_IIDX_DMA_DONE_TX:
-            break;
-        default:
-            break;
-    }
-}
-
 void GROUP1_IRQHandler(void)
 {
     gGpioState = 0xffff;
@@ -346,15 +335,15 @@ void GROUP1_IRQHandler(void)
     /* Store the current pin state */
     gGpioState = (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT10_PIN) << 0) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT9_PIN) << 1) |
-                 (1 << 2) |
+                 (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT8_PIN) << 2) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT7_PIN) << 3) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT6_PIN) << 4) |
-                 (1 << 5) |
+                 (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT5_PIN) << 5) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT4_PIN) << 6) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT3_PIN) << 7) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT2_PIN) << 8) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT1_PIN) << 9) |
-                 (1 << 10) |
+                 (DL_GPIO_readPinStatus(GPIO_BUTTONS_BUT_PIN) << 10) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_J2_SW_PIN) << 11) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_J1_SW_PIN) << 12) |
                  (DL_GPIO_readPinStatus(GPIO_BUTTONS_R_BUT1_PIN) << 13) |
@@ -367,7 +356,6 @@ void GROUP1_IRQHandler(void)
         if (((gGpioState >> i) & 0x1) != ((gLastGpioState >> i) & 0x1)) {
             /* Set LED to indicate start of transfer */
             DL_GPIO_togglePins(GPIO_INT_PORT, GPIO_INT_OUT_PIN);
-
         }
     }
     gLastGpioState = gGpioState;
