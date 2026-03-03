@@ -32,8 +32,8 @@
 
 #include "ti_msp_dl_config.h"
 
-#define FW_VERSION  0x0201
-#define I2C_TX_LENGTH   0x8
+#define FW_VERSION  0x0202
+#define I2C_TX_LENGTH   0xa
 #define I2C_RX_LENGTH   0x1
 
 /* Commands */
@@ -41,6 +41,7 @@
 #define PHYHANDHELD_SWRST		0x0002
 #define PHYHANDHELD_BUT_BITMAP		0x0003
 #define PHYHANDHELD_ADC     		0x0004
+#define PHYHANDHELD_READ_ALL   		0x0005
 
 /* Button Mapping */
 #define PHYHANDHELD_R_BUT			0x4000
@@ -179,6 +180,10 @@ void processCommand(uint8_t cmd){
         case PHYHANDHELD_ADC:
             ADC4Process();
             break;
+        case PHYHANDHELD_READ_ALL:
+            But4Process();
+            ADC4Process();
+            break;
         default:
             break;
     }
@@ -193,6 +198,8 @@ void FW4Version(uint8_t cmd){
     gTxPacket[5] = 0;
     gTxPacket[6] = 0;
     gTxPacket[7] = 0;
+    gTxPacket[8] = 0;
+    gTxPacket[9] = 0;
 
     /* Fill TX FIFO with firmware version */
     DL_I2C_fillTargetTXFIFO(I2C_INST, gTxPacket, I2C_TX_LENGTH);
@@ -240,14 +247,14 @@ void ADC4Process(void){
         gLastADCResult3 = gADCResult3;
     }
 
-    gTxPacket[0] = (uint8_t)((gADCResult0 >> 8) & 0xFF);
-    gTxPacket[1] = (uint8_t)(gADCResult0 & 0xFF);
-    gTxPacket[2] = (uint8_t)((gADCResult1 >> 8) & 0xFF);
-    gTxPacket[3] = (uint8_t)(gADCResult1 & 0xFF);
-    gTxPacket[4] = (uint8_t)((gADCResult2 >> 8) & 0xFF);
-    gTxPacket[5] = (uint8_t)(gADCResult2 & 0xFF);
-    gTxPacket[6] = (uint8_t)((gADCResult3 >> 8) & 0xFF);
-    gTxPacket[7] = (uint8_t)(gADCResult3 & 0xFF);
+    gTxPacket[2] = (uint8_t)((gADCResult0 >> 8) & 0xFF);
+    gTxPacket[3] = (uint8_t)(gADCResult0 & 0xFF);
+    gTxPacket[4] = (uint8_t)((gADCResult1 >> 8) & 0xFF);
+    gTxPacket[5] = (uint8_t)(gADCResult1 & 0xFF);
+    gTxPacket[6] = (uint8_t)((gADCResult2 >> 8) & 0xFF);
+    gTxPacket[7] = (uint8_t)(gADCResult2 & 0xFF);
+    gTxPacket[8] = (uint8_t)((gADCResult3 >> 8) & 0xFF);
+    gTxPacket[9] = (uint8_t)(gADCResult3 & 0xFF);
 
     //DL_ADC12_stopConversion(ADC12_0_INST);
 
@@ -273,12 +280,6 @@ uint8_t DL_GPIO_readPinStatus(uint32_t pins)
 void But4Process(void) {
     gTxPacket[0] = (uint8_t)((gGpioState >> 8) & 0xFF);
     gTxPacket[1] = (uint8_t)(gGpioState & 0xFF);
-    gTxPacket[2] = 0;
-    gTxPacket[3] = 0;
-    gTxPacket[4] = 0;
-    gTxPacket[5] = 0;
-    gTxPacket[6] = 0;
-    gTxPacket[7] = 0;
 
     DL_I2C_fillTargetTXFIFO(I2C_INST, gTxPacket, I2C_TX_LENGTH);
     
