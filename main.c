@@ -65,6 +65,7 @@ uint8_t gRxPacket;
 
 /* Data sent to Controller during a Read transfer */
 uint8_t gTxPacket[I2C_TX_LENGTH];
+uint8_t gLocalPacket[I2C_TX_LENGTH];
 
 /* Boolean to know when a stop command was issued */
 bool gStopReceived = false;
@@ -190,17 +191,19 @@ void processCommand(uint8_t cmd){
 }
 
 void FW4Version(uint8_t cmd){
-    gTxPacket[0] = (uint8_t)((FW_VERSION >> 8) & 0xFF);
-    gTxPacket[1] = (uint8_t)(FW_VERSION & 0xFF);
-    gTxPacket[2] = 0;
-    gTxPacket[3] = 0;
-    gTxPacket[4] = 0;
-    gTxPacket[5] = 0;
-    gTxPacket[6] = 0;
-    gTxPacket[7] = 0;
-    gTxPacket[8] = 0;
-    gTxPacket[9] = 0;
+    gLocalPacket[0] = (uint8_t)((FW_VERSION >> 8) & 0xFF);
+    gLocalPacket[1] = (uint8_t)(FW_VERSION & 0xFF);
+    gLocalPacket[2] = 0;
+    gLocalPacket[3] = 0;
+    gLocalPacket[4] = 0;
+    gLocalPacket[5] = 0;
+    gLocalPacket[6] = 0;
+    gLocalPacket[7] = 0;
+    gLocalPacket[8] = 0;
+    gLocalPacket[9] = 0;
 
+    memcpy(gTxPacket, gLocalPacket, 10);
+    
     /* Fill TX FIFO with firmware version */
     DL_I2C_fillTargetTXFIFO(I2C_INST, gTxPacket, I2C_TX_LENGTH);
 }
@@ -247,18 +250,19 @@ void ADC4Process(void){
         gLastADCResult3 = gADCResult3;
     }
 
-    gTxPacket[2] = (uint8_t)((gADCResult0 >> 8) & 0xFF);
-    gTxPacket[3] = (uint8_t)(gADCResult0 & 0xFF);
-    gTxPacket[4] = (uint8_t)((gADCResult1 >> 8) & 0xFF);
-    gTxPacket[5] = (uint8_t)(gADCResult1 & 0xFF);
-    gTxPacket[6] = (uint8_t)((gADCResult2 >> 8) & 0xFF);
-    gTxPacket[7] = (uint8_t)(gADCResult2 & 0xFF);
-    gTxPacket[8] = (uint8_t)((gADCResult3 >> 8) & 0xFF);
-    gTxPacket[9] = (uint8_t)(gADCResult3 & 0xFF);
+    gLocalPacket[2] = (uint8_t)((gADCResult0 >> 8) & 0xFF);
+    gLocalPacket[3] = (uint8_t)(gADCResult0 & 0xFF);
+    gLocalPacket[4] = (uint8_t)((gADCResult1 >> 8) & 0xFF);
+    gLocalPacket[5] = (uint8_t)(gADCResult1 & 0xFF);
+    gLocalPacket[6] = (uint8_t)((gADCResult2 >> 8) & 0xFF);
+    gLocalPacket[7] = (uint8_t)(gADCResult2 & 0xFF);
+    gLocalPacket[8] = (uint8_t)((gADCResult3 >> 8) & 0xFF);
+    gLocalPacket[9] = (uint8_t)(gADCResult3 & 0xFF);
 
     //DL_ADC12_stopConversion(ADC12_0_INST);
 
     /* Fill TX FIFO with firmware version */
+    memcpy(gTxPacket, gLocalPacket, 10);
     DL_I2C_fillTargetTXFIFO(I2C_INST, gTxPacket, I2C_TX_LENGTH);
     
     DL_ADC12_enableConversions(ADC12_0_INST);
@@ -278,11 +282,9 @@ uint8_t DL_GPIO_readPinStatus(uint32_t pins)
 }
 
 void But4Process(void) {
-    gTxPacket[0] = (uint8_t)((gGpioState >> 8) & 0xFF);
-    gTxPacket[1] = (uint8_t)(gGpioState & 0xFF);
+    gLocalPacket[0] = (uint8_t)((gGpioState >> 8) & 0xFF);
+    gLocalPacket[1] = (uint8_t)(gGpioState & 0xFF);
 
-    DL_I2C_fillTargetTXFIFO(I2C_INST, gTxPacket, I2C_TX_LENGTH);
-    
     return;
 }
 
